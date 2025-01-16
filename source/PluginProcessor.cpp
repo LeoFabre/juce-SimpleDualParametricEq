@@ -15,13 +15,13 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
        parameters(*this, nullptr, juce::Identifier("PARAMETERS"),
        {
            // EQ1 Parameters
-           std::make_unique<juce::AudioParameterFloat>("EQ1_FREQ", "EQ1 Frequency", 20.0f, 20000.0f, 1000.0f),
+           std::make_unique<juce::AudioParameterFloat>("EQ1_FREQ", "EQ1 Frequency", logRange(20.0f, 20000.0f), 1000.0f),
            std::make_unique<juce::AudioParameterFloat>("EQ1_GAIN", "EQ1 Gain", -24.0f, 24.0f, 0.0f),
            std::make_unique<juce::AudioParameterFloat>("EQ1_Q", "EQ1 Q", 0.1f, 10.0f, 1.0f),
            std::make_unique<juce::AudioParameterBool>("EQ1_ON", "EQ1 On", true),
 
            // EQ2 Parameters
-           std::make_unique<juce::AudioParameterFloat>("EQ2_FREQ", "EQ2 Frequency", 20.0f, 20000.0f, 5000.0f),
+           std::make_unique<juce::AudioParameterFloat>("EQ2_FREQ", "EQ2 Frequency", logRange(20.0f, 20000.0f), 5000.0f),
            std::make_unique<juce::AudioParameterFloat>("EQ2_GAIN", "EQ2 Gain", -24.0f, 24.0f, 0.0f),
            std::make_unique<juce::AudioParameterFloat>("EQ2_Q", "EQ2 Q", 0.1f, 10.0f, 1.0f),
            std::make_unique<juce::AudioParameterBool>("EQ2_ON", "EQ2 On", true),
@@ -101,7 +101,6 @@ void AudioPluginAudioProcessor::changeProgramName (int index, const juce::String
 //==============================================================================
 void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Préparation des filtres EQ
     juce::dsp::ProcessSpec spec;
     spec.sampleRate = sampleRate;
     spec.maximumBlockSize = samplesPerBlock;
@@ -112,13 +111,11 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     eq2Filter.prepare(spec);
     eq2Filter.reset();
 
-    // Initialisation des filtres avec les paramètres actuels
     updateFilters();
 }
 
 void AudioPluginAudioProcessor::releaseResources()
 {
-    // Libération des ressources si nécessaire
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -150,23 +147,18 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    // Efface les canaux de sortie non utilisés
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    // Met à jour les filtres au cas où les paramètres ont changé
     updateFilters();
 
-    // Création d'un processeur DSP pour traiter le buffer
     juce::dsp::AudioBlock<float> block(buffer);
     juce::dsp::ProcessContextReplacing<float> context(block);
 
-    // Appliquer EQ1 si activé
     bool eq1On = parameters.getRawParameterValue("EQ1_ON")->load();
     if (eq1On)
         eq1Filter.process(context);
 
-    // Appliquer EQ2 si activé
     bool eq2On = parameters.getRawParameterValue("EQ2_ON")->load();
     if (eq2On)
         eq2Filter.process(context);
