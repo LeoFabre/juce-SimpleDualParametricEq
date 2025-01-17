@@ -212,11 +212,10 @@ void AudioPluginAudioProcessor::updateFilters()
     bool eq1On = parameters.getRawParameterValue("EQ1_ON")->load();
 
     if (eq1On) {
-        auto coeffs = juce::dsp::IIR::Coefficients<float>::makePeakFilter(getSampleRate(), eq1Freq, eq1Q,
-            juce::Decibels::decibelsToGain(eq1Gain));
-        *eq1Filter.coefficients = *coeffs;
+        auto newCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(
+            getSampleRate(), eq1Freq, eq1Q, juce::Decibels::decibelsToGain(eq1Gain));
+        *eq1Filter.state = *newCoefficients;
     } else {
-        // Réinitialiser le filtre (état interne)
         eq1Filter.reset();
     }
 
@@ -227,11 +226,10 @@ void AudioPluginAudioProcessor::updateFilters()
     bool eq2On = parameters.getRawParameterValue("EQ2_ON")->load();
 
     if (eq2On) {
-        auto coeffs = juce::dsp::IIR::Coefficients<float>::makePeakFilter(getSampleRate(), eq2Freq, eq2Q,
-            juce::Decibels::decibelsToGain(eq2Gain));
-        *eq2Filter.coefficients = *coeffs;
+        auto newCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(
+            getSampleRate(), eq2Freq, eq2Q, juce::Decibels::decibelsToGain(eq2Gain));
+        *eq2Filter.state = *newCoefficients;
     } else {
-        // Réinitialiser le filtre (état interne)
         eq2Filter.reset();
     }
 }

@@ -73,8 +73,8 @@ public:
 private:
     juce::AudioProcessorValueTreeState parameters;
 
-    juce::dsp::IIR::Filter<float> eq1Filter;
-    juce::dsp::IIR::Filter<float> eq2Filter;
+    juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> eq1Filter;
+    juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> eq2Filter;
 
     void updateFilters();
 
